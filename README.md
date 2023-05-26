@@ -11,3 +11,10 @@ Provides a simple, in-memory data-store that will not persist between startups.
 1. Golang
 
 ## Running Locally
+
+Open a terminal and run the following commands:
+
+```
+$ go build .
+$ ./go-example-webapp
+```

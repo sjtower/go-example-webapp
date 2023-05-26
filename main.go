@@ -26,7 +26,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	searchTerm := r.URL.Path[len("/search/"):]
 	results := search(searchTerm)
 	for _, p := range results {
-		fmt.Fprintf(w, "<h1>%s</h1><div>%s</div><div>%s</div>", p.Name, p.Category, p.SKU)
+		fmt.Fprintf(w, "<div>Name: %s</div><div>Category: %s</div><div>SKU: %s</div>", p.Name, p.Category, p.SKU)
 	}
 }
 
