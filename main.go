@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"html/template"
 	"net/http"
 )
 
@@ -29,13 +30,35 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func createHandler(w http.ResponseWriter, r *http.Request) {
+func addProductHandler(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "add")
+}
 
+func saveHandler(w http.ResponseWriter, r *http.Request) {
+	name := r.FormValue("name")
+	category := r.FormValue("category")
+	sku := r.FormValue("sku")
+	log.Infof("New Product saved - name: %s, category: %s, sku: %s", name, category, sku)
+	p := &Product{Name: name, Category: category, SKU: sku}
+	err := p.save()
+	if err != nil {
+		//409 response code indicates duplicate record
+		//todo: error handling
+		http.Redirect(w, r, "/add", 409)
+	}
+	http.Redirect(w, r, "/add", http.StatusFound)
+}
+
+func renderTemplate(w http.ResponseWriter, tmpl string) {
+	t, _ := template.ParseFiles(tmpl + ".html")
+	t.Execute(w, nil)
 }
 
 func main() {
 	test()
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/search/", searchHandler)
+	http.HandleFunc("/add/", addProductHandler)
+	http.HandleFunc("/save/", saveHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
