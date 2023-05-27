@@ -10,7 +10,7 @@ Provides a simple, in-memory data-store that will not persist between startups.
 
 1. Golang
 
-## Running Locally
+## Run Locally
 
 Open a terminal and run the following commands:
 
@@ -19,12 +19,20 @@ $ go build .
 $ ./go-example-webapp
 ```
 
+## Run Tests
+
+Open a terminal and run the following commands:
+
+```
+$ go test ./...
+```
+
 ## Stretch Goals
 
 1. simple error handling - DONE
 2. search page - DONE
 3. home bar links - DONE
-4. unit tests for search and save
+4. unit tests for search and save - DONE
 5. integration test
 6. use docker-compose to add a DB to persist the data 
 7. use bootstrap to make the UI look better
