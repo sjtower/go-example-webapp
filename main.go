@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+var templates = template.Must(template.ParseFiles("add.html", "search.html"))
+
 func test() {
 	p1 := &Product{Name: "TestProduct", Category: "This is a sample Product.", SKU: "testSKU0"}
 	err := p1.save()
@@ -22,12 +24,31 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
-	//drop the leading "/search/" part of the URL path to get the search term
-	searchTerm := r.URL.Path[len("/search/"):]
-	results := search(searchTerm)
+
+	name := r.FormValue("name")
+	category := r.FormValue("category")
+	sku := r.FormValue("sku")
+	allFieldsTerm := r.FormValue("searchAll")
+	log.Infof("Search - name: %s, category: %s, sku: %s, searchAll: %s", name, category, sku, allFieldsTerm)
+
+	var results []Product
+	if allFieldsTerm != "" {
+		results = searchAll(allFieldsTerm)
+	} else {
+		if name != "" {
+			results = searchName(name)
+		} else if category != "" {
+			results = searchCategory(category)
+		} else if sku != "" {
+			results = searchSKU(sku)
+		}
+	}
+
 	for _, p := range results {
 		fmt.Fprintf(w, "<div>Name: %s</div><div>Category: %s</div><div>SKU: %s</div>", p.Name, p.Category, p.SKU)
 	}
+
+	renderTemplate(w, "search")
 }
 
 func addProductHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,16 +63,17 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	p := &Product{Name: name, Category: category, SKU: sku}
 	err := p.save()
 	if err != nil {
-		//409 response code indicates duplicate record
-		//todo: error handling
-		http.Redirect(w, r, "/add", 409)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	http.Redirect(w, r, "/add", http.StatusFound)
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string) {
-	t, _ := template.ParseFiles(tmpl + ".html")
-	t.Execute(w, nil)
+	err := templates.ExecuteTemplate(w, tmpl+".html", nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func main() {
