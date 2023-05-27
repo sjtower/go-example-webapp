@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 	"html/template"
 	"net/http"
@@ -9,18 +11,12 @@ import (
 
 var templates = template.Must(template.ParseFiles("add.html", "search.html"))
 
-func test() {
-	p1 := &Product{Name: "TestProduct", Category: "This is a sample Product.", SKU: "testSKU0"}
-	err := p1.save()
+func baseHandler(w http.ResponseWriter, r *http.Request) {
+	var products = getAll()
+	err := json.NewEncoder(w).Encode(&products)
 	if err != nil {
-		log.Errorf("Error saving product: %v", err)
+		log.Errorf("Error encoding exampleProducts: %s", err.Error())
 	}
-	p2 := get("testSKU0")
-	log.Infof("Product: %v", p2.SKU)
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,14 +32,15 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		results = searchAll(allFieldsTerm)
 	} else {
 		if name != "" {
-			results = searchName(name)
+			results = search("Name", name)
 		} else if category != "" {
-			results = searchCategory(category)
+			results = search("Category", category)
 		} else if sku != "" {
-			results = searchSKU(sku)
+			results = search("SKU", sku)
 		}
 	}
 
+	//todo: replace this with an html template
 	for _, p := range results {
 		fmt.Fprintf(w, "<div>Name: %s</div><div>Category: %s</div><div>SKU: %s</div>", p.Name, p.Category, p.SKU)
 	}
@@ -77,10 +74,23 @@ func renderTemplate(w http.ResponseWriter, tmpl string) {
 }
 
 func main() {
-	test()
-	http.HandleFunc("/", handler)
+
+	db := initDB()
+	defer func(db *gorm.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Errorf("Error closing db: %s", err.Error())
+		}
+	}(db)
+
+	http.HandleFunc("/", baseHandler)
 	http.HandleFunc("/search/", searchHandler)
 	http.HandleFunc("/add/", addProductHandler)
 	http.HandleFunc("/save/", saveHandler)
+	http.HandleFunc("/test/", testHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func testHandler(writer http.ResponseWriter, request *http.Request) {
+	SaveTestData()
 }

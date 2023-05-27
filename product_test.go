@@ -19,7 +19,7 @@ func TestSearchAll(t *testing.T) {
 
 func TestSearchName(t *testing.T) {
 	saveTestProduct(t, "TestProductName")
-	p2 := searchName("TestProduct")
+	p2 := search("name", "TestProduct")
 	if p2[0].Name != "TestProductAll" {
 		t.Errorf("Expected Name: %s, got: %s", "TestProduct", p2[0].Name)
 	}
@@ -27,7 +27,7 @@ func TestSearchName(t *testing.T) {
 
 func TestSearchCategory(t *testing.T) {
 	saveTestProduct(t, "TestProductCat")
-	p2 := searchCategory("This is a sample Product.")
+	p2 := search("Category", "This is a sample Product.")
 	if p2[0].Category != "This is a sample Product." {
 		t.Errorf("Expected Category: %s, got: %s", "This is a sample Product.", p2[0].Category)
 	}
@@ -35,7 +35,7 @@ func TestSearchCategory(t *testing.T) {
 
 func TestSearchSKU(t *testing.T) {
 	saveTestProduct(t, "TestProductSKU")
-	p2 := searchSKU("testSKU0")
+	p2 := search("SKU", "testSKU0")
 	if p2[0].SKU != "testSKU0TestProductAll" {
 		t.Errorf("Expected SKU: %s, got: %s", "testSKU0", p2[0].SKU)
 	}
