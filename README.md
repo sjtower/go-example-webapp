@@ -31,6 +31,8 @@ $ go build .
 $ ./go-example-webapp
 ```
 
+Navigate to 'http://localhost:8080/add/' to access the web application
+
 ## Run Tests
 
 Ensure the webserver is running and run the following command:
