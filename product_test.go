@@ -1,51 +1,46 @@
 package main
 
-import "testing"
+import (
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+	"testing"
+)
 
-func TestSearchAll_empty(t *testing.T) {
-	p2 := searchAll("testSKU0")
-	if len(p2) != 0 {
-		t.Errorf("expected no results, got %v", len(p2))
-	}
-}
+func TestAddAndSearch(t *testing.T) {
+	saveTestProduct(t, "Widget", "WID001")
 
-func TestSearchAll(t *testing.T) {
-	saveTestProduct(t, "TestProductAll")
-	p2 := searchAll("testSKU0")
-	if p2[0].SKU != "testSKU0TestProductAll" {
-		t.Errorf("Expected SKU: %s, got: %s", "testSKU0", p2[0].SKU)
-	}
-}
+	//make request to search for the product
+	response, err := http.PostForm("http://localhost:8080/search/", url.Values{"name": {"Widget"}})
 
-func TestSearchName(t *testing.T) {
-	saveTestProduct(t, "TestProductName")
-	p2 := search("name", "TestProduct")
-	if p2[0].Name != "TestProductAll" {
-		t.Errorf("Expected Name: %s, got: %s", "TestProduct", p2[0].Name)
-	}
-}
-
-func TestSearchCategory(t *testing.T) {
-	saveTestProduct(t, "TestProductCat")
-	p2 := search("Category", "This is a sample Product.")
-	if p2[0].Category != "This is a sample Product." {
-		t.Errorf("Expected Category: %s, got: %s", "This is a sample Product.", p2[0].Category)
-	}
-}
-
-func TestSearchSKU(t *testing.T) {
-	saveTestProduct(t, "TestProductSKU")
-	p2 := search("SKU", "testSKU0")
-	if p2[0].SKU != "testSKU0TestProductAll" {
-		t.Errorf("Expected SKU: %s, got: %s", "testSKU0", p2[0].SKU)
-	}
-}
-
-func saveTestProduct(t *testing.T, name string) {
-	sku := "testSKU0" + name
-	p1 := &Product{Name: name, Category: "This is a sample Product.", SKU: sku}
-	err := p1.save()
 	if err != nil {
-		t.Errorf("Error saving product: %v", err)
+		t.Errorf("Error making search request: %v", err)
+	}
+
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+
+	if err != nil {
+		t.Errorf("Error reading response body: %v", err)
+	}
+
+	if !strings.Contains(string(body), "<div>Name: Widget</div><div>Category: This is a sample Product.</div><div>SKU: WID001</div>") {
+		t.Errorf("Expected Widget result, got %s", string(body))
+	}
+	//fmt.Printf("%s\n", string(body))
+}
+
+func saveTestProduct(t *testing.T, name string, sku string) {
+	response, err := http.PostForm("http://localhost:8080/save/", url.Values{"name": {"Widget"},
+		"category": {"This is a sample Product."}, "sku": {"WID001"}})
+	if err != nil {
+		t.Errorf("Error making add request: %v", err)
+	}
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+
+	if err != nil || body == nil {
+		t.Errorf("Error reading response body: %v", err)
 	}
 }

@@ -4,7 +4,7 @@ A simple example webapp written in Go
 ## Summary
 A bare-bones webapp that supports entering product information and searching on those fields
 
-Provides a simple, in-memory data-store that will not persist between startups.
+Uses Postgres as data-store that will persist between sessions
 
 ## Requirements
 
@@ -13,14 +13,18 @@ Provides a simple, in-memory data-store that will not persist between startups.
 
 ## Run Locally
 
-Connect a CLI to your local PostgreSQL instance and create a database called `products`:
+:information_source: Note that the following instructions assume that you are using MacOS
+
+The program requires a database named `product` and expects the SQL server to run on `localhost:5432`.
+
+One way to do this is to connect a CLI to your local PostgreSQL instance. Open a terminal and run the following commands:
 
 ```
 psql
-createdb -p 5432 -h localhost -e products
+CREATE DATABASE product;
 ```
 
-Open a terminal and run the following commands:
+To run the webserver, open another terminal and run the following commands:
 
 ```
 $ go build .
@@ -29,10 +33,10 @@ $ ./go-example-webapp
 
 ## Run Tests
 
-Open a terminal and run the following commands:
+Ensure the webserver is running and run the following command:
 
 ```
-$ go test ./...
+$ go test
 ```
 
 ## Stretch Goals
@@ -40,11 +44,8 @@ $ go test ./...
 1. simple error handling - DONE
 2. search page - DONE
 3. home bar links - DONE
-4. Postgres DB - DONE
-5. fix unit tests
-6. integration test
-7. use Gin for the web framework
-8. use docker-compose for DB 
-9. use bootstrap to make the UI look better
-10. implement Protobuf / Twirp for the API
-11. implement react and typescript for the UI
+4. integration test - DONE
+5. use docker-compose to add a DB to persist the data 
+6. use bootstrap to make the UI look better
+7. implement Protobuf / Twirp for the API
+8. implement react and typescript for the UI

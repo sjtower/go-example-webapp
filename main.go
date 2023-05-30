@@ -56,6 +56,10 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	category := r.FormValue("category")
 	sku := r.FormValue("sku")
+	if name == "" || category == "" || sku == "" {
+		http.Error(w, "Missing required field(s)", http.StatusBadRequest)
+		return
+	}
 	log.Infof("New Product saved - name: %s, category: %s, sku: %s", name, category, sku)
 	p := &Product{Name: name, Category: category, SKU: sku}
 	err := p.save()
