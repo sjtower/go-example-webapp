@@ -4,7 +4,7 @@ A simple example webapp written in Go
 ## Summary
 A bare-bones webapp that supports entering product information and searching on those fields
 
-Uses Postgres as data-store that will persist between sessions
+Uses Postgres as a data-store that will persist between sessions
 
 ## Requirements
 
